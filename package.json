@@ -1,0 +1,29 @@
+{
+  "name": "exchange.script",
+  "version": "0.1.0",
+  "description": "A framework to formulize the API entrance of different cryptocurrency exchanges.",
+  "main": "index.js",
+  "directories": {
+    "example": "examples",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Changdao/exchange.script.git"
+  },
+  "keywords": [
+    "cryptocurrency",
+    "exchange",
+    "automatic",
+    "bot"
+  ],
+  "author": "Changdao",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Changdao/exchange.script/issues"
+  },
+  "homepage": "https://github.com/Changdao/exchange.script#readme"
+}
