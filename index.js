@@ -1,9 +1,11 @@
 "use strict";
 
-let Exchange = function(driver,options){
-    if(!driver)throw new Error('No driver');
-    this.driver = driver;
 
+let Exchange = function(options){
+    if(!options||!options.driver)throw new Error('No driver');
+    this.driver = options.driver;
+    this.driver.init(options.accessKey,options.secretKey);
+    return this;
 };
 
 Exchange.prototype.getMarkets  = function(){
@@ -14,11 +16,17 @@ Exchange.prototype.useMarket = function(market){
 
 };
 
-let Market = function(){
-
+Exchange.prototype.getBalance = function(){
+    var result = this.driver.getBalance();
+    return result;
 };
 
-Market.prototyp.getLast=function(){
+
+let Market = function(exchange,marketname){
+    this.exchange = exchange;
+};
+
+Market.prototype.getLast=function(){
 
 };
 
@@ -26,7 +34,10 @@ Market.prototype.sell = function(price,amount){
 
 };
 
-Market.prototyp.buy = function(price,amount){
+Market.prototype.buy = function(price,amount){
 
 };
 
+
+module.exports.Exchange = Exchange;
+module.exports.Market = Market;
