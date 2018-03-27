@@ -4,7 +4,7 @@
 let Exchange = function(options){
     if(!options||!options.driver)throw new Error('No driver');
     this.driver = options.driver;
-    this.driver.init(options.accessKey,options.secretKey);
+    this.driver.init(options);
     return this;
 };
 

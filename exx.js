@@ -1,7 +1,60 @@
 var crypto = require('crypto');
 var https = require('https');
+var shttps = require('socks5-https-client');
+var util = require('./lib/util');
+
 
 var driverInstance={};
+
+
+driverInstance.init = function(options){
+    this.accessKey = options.accessKey;
+    this.secretKey = options.secretKey;
+    if(options.proxy)
+    {
+        var proxy = util.parseProxy(options.proxy);
+        this.socksHost = proxy.socksHost;
+        this.socksPort = proxy.socksPort;
+    }
+};
+
+driverInstance.remoteGetMarkets = function(){
+
+    if(this.socksHost)
+    {
+        var socksHost = this.socksHost;
+        var socksPort = this.socksPort;
+        return new Promise(function(resolve,reject){
+            shttps.get({hostname:'api.exx.com',
+                        path:'/data/v1/markets',
+                        socksHost:socksHost,
+                        socksPort:socksPort
+            },function(res,err){
+                res.setEncoding('utf8');
+                res.on('readable',function(){
+                    console.log(res.read());
+                });
+            })
+        });
+    }
+    else
+    {
+        return new Promise(function(resolve,reject){
+            https.get('https://api.exx.com/data/v1/markets',(r)=>{
+                r.on('data',(chunk)=>{
+                    data+=chunk;
+                });
+                r.on('end',()=>{
+                    resolve(JSON.parse(data));
+                });
+            }).on('error',(e)=>{
+                //console.error(e);
+                reject(e);
+            })
+        })
+    }
+
+};
 
 driverInstance.getBalance=function(){
     var secretKey = this.secretKey;
@@ -28,12 +81,6 @@ driverInstance.getBalance=function(){
             reject(e);
         });
     });
-};
-
-
-driverInstance.init = function(accessKey,secretKey){
-    this.accessKey = accessKey;
-    this.secretKey = secretKey;
 };
 
 

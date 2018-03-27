@@ -4,3 +4,9 @@
 
 .DS_Store
 /.DS_Store
+
+examples
+examples/
+/examples
+
+node_modules
