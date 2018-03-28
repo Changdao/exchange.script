@@ -250,7 +250,8 @@ driverInstance.buy=function(market,price,amount,type='buy'){
         var p1 = params.slice();
         p1.push('secret_key='+secretKey);
         var p2 =p1.sort().join('&');
-
+        console.log('[debug]:',p2);
+        
         const digest = crypto.createHash('md5');
         var sign = digest.update(p2).digest('hex').toUpperCase();
         
