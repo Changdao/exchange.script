@@ -184,60 +184,15 @@ driverInstance.getBalance=function(){
 
 
 
-driverInstance.sell=function(market,price,amount,type='sell'){
-    var secretKey = this.secretKey;
-    var apiKey = this.apiKey;
-    return new Promise(function(resolve,reject){
-        var params = ['api_key='+apiKey,
-                      'symbol='+market,
-                      'type='+type,
-                      'price='+price,
-                      'amount='+amount
-                      ];
-        var p1 = params.slice();
-        p1.push('secret_key='+secretKey);
-        var p2 = p1.sort().join('&');
-
-
-        const digest = crypto.createHash('md5');
-        var sign = digest.update(p2).digest('hex').toUpperCase();
-        
-        //var postData = JSON.stringify(data);
-        var postData = params.join('&')+'&sign='+sign;
-
-        console.log('[DEBUG]:',postData);
-        //var url = "https://www.okex.com/api/v1/userinfo.do";
-
-        var request=https.request({
-            hostname:'www.okex.com',
-            port:443,
-            path:'/api/v1/trade.do',
-            method:'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
-        },(r)=>{
-            var str= '';
-            r.on('data', (chunk) => {
-                str+= chunk.toString('utf8');
-            });
-            r.on('end',()=>{
-                console.log('DATA:',str);
-                var obj = JSON.parse(str);
-                resolve(obj);
-            })
-        }).on('error', (e)=> {
-            console.error(e);
-            reject(e);
-        });
-
-        request.write(postData);
-        request.end();
-        console.log('........');
-    });
+driverInstance.sell=function(market,price,amount){
+    return driverInstance.trade(market,price,amount,'sell');
 };
 
-driverInstance.buy=function(market,price,amount,type='buy'){
+driverInstance.buy=function(market,price,amount){
+    return driverInstance.trade(market,price,amount,'buy');
+};
+
+driverInstance.trade=function(market,price,amount,type){
     var secretKey = this.secretKey;
     var apiKey = this.apiKey;
     return new Promise(function(resolve,reject){
