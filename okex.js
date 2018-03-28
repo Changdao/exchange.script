@@ -20,43 +20,7 @@ driverInstance.init = function(options){
 };
 
 driverInstance.remoteGetMarkets = function(){
-
-    if(this.socksHost)
-    {
-        console.log('INFO:Requesting markets through socks5');
-
-        var socksHost = this.socksHost;
-        var socksPort = this.socksPort;
-        return new Promise(function(resolve,reject){
-            shttps.get({hostname:'www.okcoin.com',
-                path:'/api/v1/ticker.do',
-                socksHost:socksHost,
-                socksPort:socksPort
-            },function(res,err){
-                res.setEncoding('utf8');
-                res.on('readable',function(){
-                    console.log(res.read());
-                });
-            })
-        });
-    }
-    else
-    {
-        return new Promise(function(resolve,reject){
-            https.get('https://www.okex.com/api/v1/ticker.do',(r)=>{
-                r.on('data',(chunk)=>{
-                    data+=chunk;
-                });
-                r.on('end',()=>{
-                    resolve(JSON.parse(data));
-                });
-            }).on('error',(e)=>{
-                //console.error(e);
-                reject(e);
-            })
-        });
-    }
-
+    throw new Error('OKEx do not support list markets.');
 };
 
 driverInstance.getBalance=function(){
@@ -76,7 +40,8 @@ driverInstance.getBalance=function(){
                 api_key :apiKey,
                 sign:sign
             };
-            var postData = JSON.stringify(data);
+            //var postData = JSON.stringify(data);
+            var postData = 'api_key='+apiKey+'&sign='+sign;
             console.log(postData);
 
             //var url = "https://www.okex.com/api/v1/userinfo.do";
@@ -121,12 +86,13 @@ driverInstance.getBalance=function(){
             var params = 'api_key='+apiKey+'&secret_key='+secretKey;
 
             const digest = crypto.createHash('md5');
-            var sign = digest.update(params).digest('hex');
+            var sign = digest.update(params).digest('hex').toUpperCase();
             var data = {
                 api_key :apiKey,
                 sign:sign
             };
-            var postData = JSON.stringify(data);
+            //var postData = JSON.stringify(data);
+            var postData = 'api_key='+apiKey+'&sign='+sign;
 
             //var url = "https://www.okex.com/api/v1/userinfo.do";
 
@@ -136,8 +102,7 @@ driverInstance.getBalance=function(){
                 path:'/api/v1/userinfo.do',
                 method:'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Content-Length': postData.length
+                    'Content-Type': 'application/x-www-form-urlencoded'
                 }
             },(r)=>{
                 var str= '';
@@ -199,7 +164,8 @@ driverInstance.getLast=function(market){
     else
     {
         return new Promise(function(resolve,reject){
-            https.get('https://www.okex.com/api/v1/ticker.do',(r)=>{
+            var url = 'https://www.okex.com/api/v1/ticker.do?symbol='+market;
+            https.get(url,(r)=>{
                 r.on('data',(chunk)=>{
                     data+=chunk;
                 });
