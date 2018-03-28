@@ -12,8 +12,9 @@ Exchange.prototype.getMarkets  = function(){
     return this.driver.remoteGetMarkets();
 };
 
-Exchange.prototype.useMarket = function(market){
-
+Exchange.prototype.useMarket = function(marketName){
+    var market=new Market(this,marketName);
+    return market;
 };
 
 Exchange.prototype.getBalance = function(){
@@ -22,12 +23,15 @@ Exchange.prototype.getBalance = function(){
 };
 
 
-let Market = function(exchange,marketname){
+let Market = function(exchange,marketName){
     this.exchange = exchange;
+    this.marketName = marketName;
+    this.driver = exchange.driver;
+    return this;
 };
 
 Market.prototype.getLast=function(){
-
+    return this.driver.getLast(this.marketName);
 };
 
 Market.prototype.sell = function(price,amount){
