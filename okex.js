@@ -166,6 +166,7 @@ driverInstance.getLast=function(market){
         return new Promise(function(resolve,reject){
             var url = 'https://www.okex.com/api/v1/ticker.do?symbol='+market;
             https.get(url,(r)=>{
+                var data = '';
                 r.on('data',(chunk)=>{
                     data+=chunk;
                 });

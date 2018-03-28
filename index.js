@@ -35,11 +35,11 @@ Market.prototype.getLast=function(){
 };
 
 Market.prototype.sell = function(price,amount){
-
+    return this.driver.sell(this.marketName,price,amount);
 };
 
 Market.prototype.buy = function(price,amount){
-
+    return this.driver.buy(this.marketName,price,amount);
 };
 
 
