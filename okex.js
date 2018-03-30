@@ -6,13 +6,23 @@ var util = require('./lib/util');
 
 var driverInstance={};
 
+var logger={
+    error:function(){
+        console.error.apply(null,arguments);
+    },
+    debug:process.env.EXCHANGE_DEBUG!=='true'?function(){}:function(){
+        console.log.apply(null,arguments);
+    }
+};
+
+
 
 driverInstance.init = function(options){
     this.apiKey = options.apiKey;
     this.secretKey = options.secretKey;
     if(options.proxy)
     {
-        console.log(options.proxy);
+        logger.debug(options.proxy);
         var proxy = util.parseProxy(options.proxy);
         this.socksHost = proxy.socksHost;
         this.socksPort = proxy.socksPort;
@@ -27,7 +37,7 @@ driverInstance.remoteGetMarkets = function(){
 driverInstance.getLast=function(market){
     if(this.socksHost)
     {
-        console.log('INFO:Requesting last through socks5');
+        logger.debug('INFO:Requesting last through socks5');
 
         var socksHost = this.socksHost;
         var socksPort = this.socksPort;
@@ -38,19 +48,19 @@ driverInstance.getLast=function(market){
             },function(res,err){
                 if(err)
                 {
-                    console.error(err);
+                    logger.error(err);
                 }
                 else
                 {
                     res.setEncoding('utf8');
                     res.on('readable',function(){
-                        console.log(res.read());
+                        logger.debug(res.read());
                     });
                     res.on('error',function(err){
-                        console.error(err);
+                        logger.error(err);
                     });
                     res.on('data',function(data){
-                        console.log(data);
+                        logger.debug(data);
                     })
                 }
 
@@ -71,6 +81,7 @@ driverInstance.getLast=function(market){
                 });
             }).on('error',(e)=>{
                 //console.error(e);
+                logger.error(e);
                 reject(e);
             })
         });
@@ -96,7 +107,7 @@ driverInstance.getBalance=function(){
             };
             //var postData = JSON.stringify(data);
             var postData = 'api_key='+apiKey+'&sign='+sign;
-            console.log(postData);
+            logger.debug(postData);
 
             //var url = "https://www.okex.com/api/v1/userinfo.do";
 
@@ -117,7 +128,7 @@ driverInstance.getBalance=function(){
                     str+= chunk.toString('utf8');
                 });
                 r.on('end',()=>{
-                    console.log('DATA:',str);
+                    logger.debug('DATA:',str);
                     var obj = JSON.parse(str);
                     resolve(obj);
                 })
@@ -128,7 +139,7 @@ driverInstance.getBalance=function(){
 
             request.write(postData);
             request.end();
-            console.log('........');
+            logger.debug('........');
         });
 
     }
@@ -164,7 +175,7 @@ driverInstance.getBalance=function(){
                     str+= chunk.toString('utf8');
                 });
                 r.on('end',()=>{
-                    console.log('DATA:',str);
+                    logger.debug('DATA:',str);
                     var obj = JSON.parse(str);
                     resolve(obj);
                 })
@@ -175,7 +186,7 @@ driverInstance.getBalance=function(){
 
             request.write(postData);
             request.end();
-            console.log('........');
+            logger.debug('........');
         });
     }
 
@@ -204,43 +215,55 @@ driverInstance.trade=function(market,price,amount,type){
                       ];
         
         var p2 =params.sort().join('&')+'&secret_key='+secretKey;
-        console.log('[debug]:',p2);
+        logger.debug('[debug]:',p2);
 
         const digest = crypto.createHash('md5');
         var sign = digest.update(p2).digest('hex').toUpperCase();
         
         //var postData = JSON.stringify(data);
         var postData = params.join('&')+'&sign='+sign;
-        console.log('[DEBUG]:',postData);
+        logger.debug('[DEBUG]:',postData);
 
         //var url = "https://www.okex.com/api/v1/userinfo.do";
-
-        var request=https.request({
-            hostname:'www.okex.com',
-            port:443,
-            path:'/api/v1/trade.do',
-            method:'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
-        },(r)=>{
-            var str= '';
-            r.on('data', (chunk) => {
-                str+= chunk.toString('utf8');
+        try
+        {
+            var request=https.request({
+                hostname:'www.okex.com',
+                port:443,
+                path:'/api/v1/trade.do',
+                method:'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            },(r)=>{
+                var str= '';
+                r.on('data', (chunk) => {
+                    str+= chunk.toString('utf8');
+                });
+                r.on('end',()=>{
+                    logger.debug('DATA:',str);
+                    var obj = JSON.parse(str);
+                    resolve(obj);
+                });
+                r.on('error',(err)=>{
+                    console.error(err);
+                    reject(e);
+                })
+            }).on('error', (e)=> {
+                console.error(e);
+                reject(e);
             });
-            r.on('end',()=>{
-                console.log('DATA:',str);
-                var obj = JSON.parse(str);
-                resolve(obj);
-            })
-        }).on('error', (e)=> {
-            console.error(e);
-            reject(e);
-        });
 
-        request.write(postData);
-        request.end();
-        console.log('........');
+            request.write(postData);
+            request.end();
+            logger.debug('[DEBUG]:request trade end.');
+        }
+        catch(e)
+        {
+            logger.error(e);
+            reject(e);
+        }
+        
     });
 };
 
